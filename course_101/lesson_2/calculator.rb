@@ -1,4 +1,4 @@
-# calculator.rb 
+# calculator.rb
 
 # ask the user for two numbers
 # ask the user for an operation to perform
@@ -7,34 +7,50 @@
 
 # answer = kernel.gets()
 # kernel.puts(answer)
+LANGUAGE = 'en'
 
+require 'YAML'
+MESSAGES = YAML.load_file('calculator_messages.yml')
 
+def messages(message, lang='en')
+  MESSAGES[lang][message]
+end
 
 def prompt(message)
   Kernel.puts("=> #{message}")
 end
 
 def valid_number?(number)
-  number.to_i() != 0
+  number.to_i.to_s == number
+end
+
+def number?(number)
+  integer?(number) || float?(input)
+  end
+
+def valid_float_number?(number)
+  number.to_f.to_s == number
 end
 
 def operation_to_message(op)
-  case op
-  when '1'
-    'Adding'
-  when '2'
-    'Subtracting'
-  when '3'
-    'Multiplying'
-  when '4'
-    'Dividing'
-  end
+  decision = case op
+             when '1'
+               'Adding'
+             when '2'
+               'Subtracting'
+             when '3'
+               'Multiplying'
+             when '4'
+               'Dividing'
+           end
+  decision
 end
 
-prompt("Welcome to Calculator! Enter your name:")
+prompt(messages('welcome', LANGUAGE))
+prompt(MESSAGES['valid_name'])
 
 name = ''
-loop do # loop so that we can continue operations if user inputs y at the end of the loop
+loop do
   name = Kernel.gets().chomp()
 
   if name.empty?()
@@ -60,7 +76,7 @@ loop do # main loop
   end
 
   number2 = ''
-  loop do 
+  loop do
     prompt("What's the second number?")
     number2 = Kernel.gets().chomp()
 
@@ -80,9 +96,9 @@ loop do # main loop
     MSG
 
   prompt(operator_prompt)
- 
+
   operator = ''
-  loop do 
+  loop do
     operator = Kernel.gets().chomp()
 
     if %w(1 2 3 4).include?(operator)
@@ -91,19 +107,19 @@ loop do # main loop
       prompt("Must choose 1, 2, 3, or 4")
     end
   end
-  
+
   prompt("#{operation_to_message(operator)} the two numbers...")
 
   result = case operator
-            when '1'
-              result = number1.to_i + number2.to_i
-            when '2'
-              result = number1.to_i - number2.to_i
-            when '3'
-              result = number1.to_i * number2.to_i
-            when '4'
-              result = number1.to_f / number2.to_f
-  end
+           when '1'
+             number1.to_i + number2.to_i
+           when '2'
+             number1.to_i - number2.to_i
+           when '3'
+             number1.to_i * number2.to_i
+           when '4'
+             number1.to_f / number2.to_f
+           end
 
   prompt("The result is #{result}")
 
@@ -113,9 +129,3 @@ loop do # main loop
 end
 
 prompt("Thank you for using the calculator!")
-
-
-
-
-
-
