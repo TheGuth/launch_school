@@ -1,34 +1,17 @@
 # rock_paper_scissors_game.rb
 
 # VALID_CHOICES = ['rock', 'paper', 'scissors', 'lizard', 'spock']
-VALID_CHOICES = {'r' => 'rock', 'p' => 'paper', 'sc' => 'scissors', 'sp' => 'spock', 'l' => 'lizard'}
+VALID_CHOICES = {
+  'r' => 'rock',
+  'p' => 'paper',
+  'sc' => 'scissors',
+  'sp' => 'spock',
+  'l' => 'lizard'
+}
 
 def prompt(message)
   Kernel.puts("=> #{message}")
 end
-
-=begin
-  player_score = 0
-  computer_score = 0
-  if player_score != 0 || computer_score != 0
-    prompt("do nothing")
-  else player_score = 0 && computer_score = 0
-  end
-=end
-
-=begin
-def score(results)
-  if results == "You Won!"
-    player_score = player_score + 1
-    prompt("players score: #{player_score} computers score: #{computer_score}")
-  elsif results == "Computer Won!"
-    computer_score = computer_score + 1
-    prompt("players score: #{player_score} computers score: #{computer_score}")
-  else
-    prompt("players score: #{player_score} computers score: #{computer_score}")
-  end
-end
-=end
 
 def win?(first, second)
   (first == 'rock' && (second == 'scissors' || second == 'lizard')) ||
@@ -62,7 +45,7 @@ def winner?(scores)
   elsif scores[:computer] >= 5
     :computer
   else
-    winner = false
+    false
   end
 end
 
@@ -77,8 +60,8 @@ loop do
       prompt("Choose one: #{VALID_CHOICES.keys.join(', ')}")
       choice = Kernel.gets().chomp()
 
-      if VALID_CHOICES.has_key?(choice) || VALID_CHOICES.has_value?(choice[choice])
-        VALID_CHOICES.has_key?(choice) == true
+      if VALID_CHOICES.key?(choice) || VALID_CHOICES.value?(choice[choice])
+        VALID_CHOICES.key?(choice) == true
         choice = VALID_CHOICES[choice]
         break
       else
@@ -97,12 +80,15 @@ loop do
 
     if winner == :player_score
       prompt("You won the whole game!")
-      prompt("The final score was - You: #{scores[:player]}, Computer #{scores[:computer]}")
+      prompt("The final score was - You: #{scores[:player]},
+        Computer #{scores[:computer]}")
     elsif winner == :computer
       prompt("The computer won the whole game!")
-      prompt("The final score was - You: #{scores[:player]}, Computer #{scores[:computer]}")
+      prompt("The final score was - You: #{scores[:player]},
+        Computer #{scores[:computer]}")
     else
-      prompt("The scores are currently - You: #{scores[:player]}, Computer #{scores[:computer]}")
+      prompt("The scores are currently - You: #{scores[:player]},
+        Computer #{scores[:computer]}")
     end
 
     break if winner
