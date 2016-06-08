@@ -72,11 +72,9 @@ loop do
     computer_choice = VALID_CHOICES.values.sample()
     Kernel.puts("Your choice: #{choice}; computer choice #{computer_choice}")
 
-    # score(display_results(choice, computer_choice))
     results = display_results(choice, computer_choice)
     scores = increment_score(results, scores)
     winner = winner?(scores)
-    # Display_results(choice, computer_choice)
 
     if winner == :player_score
       prompt("You won the whole game!")
