@@ -60,8 +60,7 @@ loop do
       prompt("Choose one: #{VALID_CHOICES.keys.join(', ')}")
       choice = Kernel.gets().chomp()
 
-      if VALID_CHOICES.key?(choice) || VALID_CHOICES.value?(choice[choice])
-        VALID_CHOICES.key?(choice) == true
+      if VALID_CHOICES.key?(choice)
         choice = VALID_CHOICES[choice]
         break
       else
