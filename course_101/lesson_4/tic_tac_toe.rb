@@ -22,6 +22,7 @@ WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] + # rows
                 [[1, 5, 9], [3, 5, 7]]              # digonals
 
 FIRST_SQUARE = 5
+WINS_NEEDED = 5
 INITIAL_MARKER = ' '.freeze
 PLAYER_MARKER = 'X'.freeze
 COMPUTER_MARKER = 'O'.freeze
@@ -80,9 +81,26 @@ end
 
 def square_at_risk(line, brd, marker)
   if brd.values_at(*line).count(marker) == 2
-    brd.select { |k, v| line.include?(k) && v == INITIAL_MARKER }.keys.first
-  else
-    nil
+    brd.select do |k_board_spot, value_marker|
+      line.include?(k_board_spot) &&
+        value_marker == INITIAL_MARKER
+    end.keys.first
+  end
+end
+
+def square_offense_defense(brd, marker)
+  WINNING_LINES.each do |line|
+    square = square_at_risk(line, brd, marker)
+    break if square
+  end
+end
+
+def first_square(brd)
+  square = nil
+  if brd[FIRST_SQUARE] == INITIAL_MARKER
+    brd[FIRST_SQUARE] = COMPUTER_MARKER
+  elsif !square
+    square = empty_squares(brd).sample
   end
 end
 
@@ -100,13 +118,9 @@ def computer_places_piece!(brd)
       break if square
     end
   end
-
-  if brd[FIRST_SQUARE] == INITIAL_MARKER
-    brd[FIRST_SQUARE] = COMPUTER_MARKER
-  # random pick
-  elsif !square
-    square = empty_squares(brd).sample
-  end
+  # marks the middle square if possible, and if not picks a random square
+  first_square(brd)
+  # Sets the marker
   brd[square] = COMPUTER_MARKER
 end
 
@@ -130,28 +144,22 @@ def detect_winner(brd)
 end
 
 def increment_score(result, scores)
-  if result == nil
-    scores
-  else
-    scores[result] += 1
-    scores
-  end
+  scores[result] += 1 if result
+  scores
 end
 
-def winner?(scores)
-  if scores[:player] >= 5
+def winner(scores)
+  if scores[:player] >= WINS_NEEDED
     :player
-  elsif scores[:computer] >= 5
+  elsif scores[:computer] >= WINS_NEEDED
     :computer
-  else
-    false
   end
 end
 
 def place_piece!(board, current_player)
-  if current_player == 0
+  if current_player == :player
     player_places_piece!(board)
-  elsif current_player == 1
+  elsif current_player == :computer
     computer_places_piece!(board)
   end
 end
@@ -159,20 +167,26 @@ end
 # rubocop is saying that current_player = 1, and cureent_player = 0
 # are useless assignments, but they are neccessary.
 def alternate_player(current_player)
-  if current_player == 0
-    current_player = 1
-  elsif current_player == 1
-    current_player = 0
-  end
+  current_player == :player ? :computer : :player
 end
 
 # Main game loop
 loop do
   prompt "Welcome to Tic Tac Toe"
   prompt "First player to score 5 wins the game!"
-  prompt "Who would you like to go first?"
-  prompt "Enter 0 for player: Enter 1 for Computer"
-  current_player = gets.chomp.to_i
+  puts ""
+  prompt "Enter who you would like to go first"
+  prompt "player or computer"
+  current_player = gets.chomp
+  if current_player.downcase.start_with?('p')
+    current_player = :player
+  elsif current_player.downcase.start_with?('c')
+    current_player = :computer
+  else
+    prompt "That wasn't one of the choices so we will let you go first."
+    current_player = :player
+  end
+
   scores = { player: 0, computer: 0 }
 
   # winner? loop
@@ -182,7 +196,7 @@ loop do
     # piece movement loop
     loop do
       display_board(board)
-      prompt "#{scores}"
+      prompt(scores.to_s)
       place_piece!(board, current_player)
       current_player = alternate_player(current_player)
       break if someone_won?(board) || board_full?(board)
@@ -198,7 +212,12 @@ loop do
 
     results = detect_winner(board)
     scores = increment_score(results, scores)
-    winner = winner?(scores)
+    winner = winner(scores)
+
+    prompt("Player Score: #{scores[:player]}
+      | Computer Score: #{scores[:computer]}")
+    prompt("hit Enter when ready for next game.")
+    time_waster = gets.chomp
 
     if winner == :player
       prompt("You won the whole game!")
@@ -216,7 +235,7 @@ loop do
     break if winner
   end
 
-  prompt "Play again (y or n)"
+  prompt "Play again? Please Enter: (yes or no)"
   answer = gets.chomp
   break unless answer.downcase.start_with?('y')
 end
