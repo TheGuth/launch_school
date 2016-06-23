@@ -100,7 +100,7 @@ def first_square(brd)
   if brd[FIRST_SQUARE] == INITIAL_MARKER
     brd[FIRST_SQUARE] = COMPUTER_MARKER
   elsif !square
-    square = empty_squares(brd).sample
+    empty_squares(brd).sample
   end
 end
 
@@ -119,7 +119,11 @@ def computer_places_piece!(brd)
     end
   end
   # marks the middle square if possible, and if not picks a random square
-  first_square(brd)
+  if brd[FIRST_SQUARE] == INITIAL_MARKER
+    brd[FIRST_SQUARE] = COMPUTER_MARKER
+  elsif !square
+    square = empty_squares(brd).sample
+  end
   # Sets the marker
   brd[square] = COMPUTER_MARKER
 end
@@ -217,7 +221,7 @@ loop do
     prompt("Player Score: #{scores[:player]}
       | Computer Score: #{scores[:computer]}")
     prompt("hit Enter when ready for next game.")
-    time_waster = gets.chomp
+    gets.chomp
 
     if winner == :player
       prompt("You won the whole game!")
