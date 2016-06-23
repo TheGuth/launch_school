@@ -89,42 +89,31 @@ def square_at_risk(line, brd, marker)
 end
 
 def square_offense_defense(brd, marker)
-  WINNING_LINES.each do |line|
-    square = square_at_risk(line, brd, marker)
-    break if square
-  end
-end
-
-def first_square(brd)
   square = nil
-  if brd[FIRST_SQUARE] == INITIAL_MARKER
-    brd[FIRST_SQUARE] = COMPUTER_MARKER
-  elsif !square
-    empty_squares(brd).sample
+  if !square
+    WINNING_LINES.each do |line|
+      square = square_at_risk(line, brd, marker)
+      break if square
+    end
   end
+  square
 end
 
 def computer_places_piece!(brd)
   square = nil
-  # offense
-  WINNING_LINES.each do |line|
-    square = square_at_risk(line, brd, COMPUTER_MARKER)
-    break if square
-  end
-  # defense first
-  if !square
-    WINNING_LINES.each do |line|
-      square = square_at_risk(line, brd, PLAYER_MARKER)
-      break if square
-    end
-  end
-  # marks the middle square if possible, and if not picks a random square
-  if brd[FIRST_SQUARE] == INITIAL_MARKER
-    brd[FIRST_SQUARE] = COMPUTER_MARKER
-  elsif !square
+
+  if square_offense_defense(brd, COMPUTER_MARKER)
+    square = square_offense_defense(brd, COMPUTER_MARKER)
+    square # didn't have it returning square at the end, but received a
+    # rubocop complaint
+  elsif square_offense_defense(brd, PLAYER_MARKER)
+    square = square_offense_defense(brd, PLAYER_MARKER)
+  elsif brd[FIRST_SQUARE] == INITIAL_MARKER
+    square = FIRST_SQUARE
+  else
     square = empty_squares(brd).sample
   end
-  # Sets the marker
+
   brd[square] = COMPUTER_MARKER
 end
 
@@ -149,7 +138,6 @@ end
 
 def increment_score(result, scores)
   scores[result] += 1 if result
-  scores
 end
 
 def winner(scores)
@@ -215,7 +203,7 @@ loop do
     end
 
     results = detect_winner(board)
-    scores = increment_score(results, scores)
+    scores[results] = increment_score(results, scores)
     winner = winner(scores)
 
     prompt("Player Score: #{scores[:player]}
@@ -241,6 +229,17 @@ loop do
 
   prompt "Play again? Please Enter: (yes or no)"
   answer = gets.chomp
+
+  if answer.downcase.start_with?('n')
+    break
+  end
+
+  while !answer.downcase.start_with?('y')
+    prompt("sorry, you didn't choose yes or no")
+    prompt("Do you want to play again? please Enter: (yes or no)")
+    answer = gets.chomp
+  end
+
   break unless answer.downcase.start_with?('y')
 end
 
