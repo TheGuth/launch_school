@@ -100,12 +100,10 @@ def square_offense_defense(brd, marker)
 end
 
 def computer_places_piece!(brd)
-  square = nil
 
   if square_offense_defense(brd, COMPUTER_MARKER)
     square = square_offense_defense(brd, COMPUTER_MARKER)
-    square # didn't have it returning square at the end, but received a
-    # rubocop complaint
+    square 
   elsif square_offense_defense(brd, PLAYER_MARKER)
     square = square_offense_defense(brd, PLAYER_MARKER)
   elsif brd[FIRST_SQUARE] == INITIAL_MARKER
@@ -156,8 +154,6 @@ def place_piece!(board, current_player)
   end
 end
 
-# rubocop is saying that current_player = 1, and cureent_player = 0
-# are useless assignments, but they are neccessary.
 def alternate_player(current_player)
   current_player == :player ? :computer : :player
 end
@@ -229,15 +225,15 @@ loop do
 
   prompt "Play again? Please Enter: (yes or no)"
   answer = gets.chomp
-
-  if answer.downcase.start_with?('n')
-    break
-  end
-
-  while !answer.downcase.start_with?('y')
-    prompt("sorry, you didn't choose yes or no")
-    prompt("Do you want to play again? please Enter: (yes or no)")
-    answer = gets.chomp
+  loop do
+    if not answer.downcase.start_with?('n') || answer.downcase.start_with?('y')
+      prompt("sorry, you didn't choose yes or no")
+      prompt("Do you want to play again? please Enter: (yes or no)")
+      answer = gets.chomp
+      if answer.downcase.start_with?('n') || answer.downcase.start_with?('y')
+        break
+      end
+    end
   end
 
   break unless answer.downcase.start_with?('y')
