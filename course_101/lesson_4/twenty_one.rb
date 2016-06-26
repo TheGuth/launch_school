@@ -5,6 +5,9 @@ require 'pry'
 WINS_NEEDED = 5
 HIGHEST_SCORE = 31
 DEALER_STAY = 27
+SUITS = ['H', 'D', 'C', 'S'].freeze
+CARDS = ['2', '3', '4', '5', '6', '7', '8',
+         '9', '10', 'J', 'Q', 'K', 'A'].freeze
 
 def clear_screen
   system('clear') || system('cls')
@@ -15,31 +18,11 @@ def prompt(msg)
 end
 
 def initialized_deck
-  [['H', '2'], ['H', '3'], ['H', '4'], ['H', '5'], ['H', '6'], ['H', '7'],
-   ['H', '8'], ['H', '9'], ['H', '10'], ['H', 'J'], ['H', 'Q'], ['H', 'K'],
-   ['H', 'A'], ['D', '2'], ['D', '3'], ['D', '4'], ['D', '5'], ['D', '6'],
-   ['D', '7'], ['D', '8'], ['D', '9'], ['D', '10'], ['D', 'J'], ['D', 'Q'],
-   ['D', 'K'], ['D', 'A'], ['C', '2'], ['C', '3'], ['C', '4'], ['C', '5'],
-   ['C', '6'], ['C', '7'], ['C', '8'], ['C', '9'], ['C', '10'], ['C', 'J'],
-   ['C', 'Q'], ['C', 'K'], ['C', 'A'], ['S', '2'], ['S', '3'], ['S', '4'],
-   ['S', '5'], ['S', '6'], ['S', '7'], ['S', '8'], ['S', '9'], ['S', '10'],
-   ['S', 'J'], ['S', 'Q'], ['S', 'K'], ['S', 'A']]
+  SUITS.product(CARDS).shuffle
 end
 
-def deal_initial_cards_to_player(cards)
-  players_hand = []
-  card_1 = cards.sample
-  card_2 = cards.sample
-  players_hand << card_1
-  players_hand << card_2
-end
-
-def deal_initial_cards_to_dealer(cards)
-  dealers_hand = []
-  card_1 = cards.sample
-  card_2 = cards.sample
-  dealers_hand << card_1
-  dealers_hand << card_2
+def deal_initial_cards(cards)
+  cards.sample(2)
 end
 
 def players_total(players_hand)
@@ -58,25 +41,28 @@ def dealers_total(dealers_hand)
   dealers_hand_total
 end
 
-def face_card_value(players_hand)
-  players_hand.each do |card|
-    if card[1] == "J" || card[1] == "Q" || card[1] == "K"
-      card[1] = '10'
+def total(cards)
+  values = cards.map { |card| card[1] }
+
+  sum = 0
+  values.each do |value|
+    if value == "A" || value == "11"
+      if sum <= (HIGHEST_SCORE - 11)
+        sum += 11
+      else
+        sum += 1
+      end
+    elsif value.to_i == 0
+      sum += 10
+    else
+      sum += value.to_i
     end
   end
+
+  sum
 end
 
-def ace_value(players_hand) # ace_value([['S', 'A'], ['H', '5']])
-  players_hand.each do |card|
-    next unless card[1] == 'A'
-    card[1] = '11' if players_total(players_hand) < (HIGHEST_SCORE - 11)
-    if players_total(players_hand) > (HIGHEST_SCORE - 11)
-      card[1] = '1'
-    end
-  end
-end
-
-def display
+def display_scoreboard_header
   puts "_____________________________________________________"
   puts "### #{HIGHEST_SCORE} GAME ###".center(50)
   puts "_____________________________________________________"
@@ -84,13 +70,26 @@ def display
   puts "_____________________________________________________"
 end
 
-def display_cards(players_hand, dealers_hand, scores)
-  display
+def hide_dealers_cards(dealers_hand, hide = true)
+  dealers_cards = ''
+  if hide == true
+    dealers_cards = "??| "
+  elsif hide == false
+    dealers_hand.each do |card|
+      cards_to_display = "|" + card[1] + "| "
+      dealers_cards += cards_to_display
+    end
+  end
+  dealers_cards
+end
+
+def display_cards(players_hand, dealers_hand, scores, hide = true)
+  display_scoreboard_header
   player_display = "Player |    #{scores[:player]}    |\
-     #{players_total(players_hand)}    | "
+     #{total(players_hand)}    | "
   dealers_display = "Dealer |    #{scores[:dealer]}    |\
-     #{dealers_total(dealers_hand)}    |\
-      |#{dealers_hand[0][1]}| and unknown card"
+     #{total(dealers_hand)}    |\
+      |#{hide_dealers_cards(dealers_hand, hide)}"
   players_hand.each do |card|
     cards_to_display = "|" + card[1] + "| "
     player_display += cards_to_display
@@ -118,22 +117,24 @@ def who_wins(players_total, dealers_total)
                 previous_players_total, previous_dealers_total)
 end
 
-def score_compare(players_total, dealers_total,
-                  previous_players_total, previous_dealers_total)
-  if players_total > dealers_total
+def score_display(previous_p_total, previous_d_total)
+  prompt("Score was player: #{previous_p_total}")
+  prompt("          dealer: #{previous_d_total}")
+end
+
+def score_compare(p_total, d_total,
+                  previous_p_total, previous_d_total)
+  if p_total > d_total
     prompt("Player Won!")
-    prompt("Score was player: #{previous_players_total}")
-    prompt("          dealer: #{previous_dealers_total}")
+    score_display(previous_p_total, previous_d_total)
     :player
-  elsif players_total < dealers_total
+  elsif p_total < d_total
     prompt("Dealer Won!")
-    prompt("Score was player: #{previous_players_total}")
-    prompt("          dealer: #{previous_dealers_total}")
+    score_display(previous_p_total, previous_d_total)
     :dealer
-  elsif players_total == dealers_total
+  elsif p_total == d_total
     prompt("Score was a tie")
-    prompt("Score was player: #{previous_players_total}")
-    prompt("          dealer: #{previous_dealers_total}")
+    score_display(previous_p_total, previous_d_total)
     :tie
   end
 end
@@ -141,10 +142,8 @@ end
 def player_turn(cards, players_hand, dealers_hand, scores)
   loop do
     system 'clear'
-    ace_value(players_hand)
-    face_card_value(players_hand)
     display_cards(players_hand, dealers_hand, scores)
-    p_total = players_total(players_hand)
+    p_total = total(players_hand)
 
     if p_total <= HIGHEST_SCORE
       prompt("Would you like to 'hit' or 'stay'? Please select one.")
@@ -163,12 +162,14 @@ def player_turn(cards, players_hand, dealers_hand, scores)
   end
 end
 
-def dealer_turn(cards, dealers_hand)
+def dealer_turn(cards, players_hand, dealers_hand, scores)
   new_card = []
+  hide = false
   loop do
-    ace_value(dealers_hand)
-    face_card_value(dealers_hand)
-    d_total = dealers_total(dealers_hand)
+    system 'clear'
+    display_cards(players_hand, dealers_hand, scores, hide)
+    sleep(2)
+    d_total = total(dealers_hand)
 
     if d_total < DEALER_STAY
       new_card = cards.sample
@@ -190,25 +191,25 @@ def winner(scores)
   end
 end
 
-def increment_score(result, scores)
-  scores[result] += 1 if result
+def increment_score(winning_player, scores)
+  scores[winning_player] += 1 if winning_player
 end
 
 loop do
   clear_screen
   prompt("Welcome to the game of twenty one!!")
-  prompt("First player to 21 wins!")
+  prompt("First player to #{HIGHEST_SCORE} wins!")
   puts ""
 
   scores = { player: 0, dealer: 0, tie: 0 }
   loop do
     cards = initialized_deck
 
-    players_hand = deal_initial_cards_to_player(cards)
-    dealers_hand = deal_initial_cards_to_dealer(cards)
+    players_hand = deal_initial_cards(cards)
+    dealers_hand = deal_initial_cards(cards)
     player_turn(cards, players_hand, dealers_hand, scores)
-    dealer_turn(cards, dealers_hand)
-    results = who_wins(players_total(players_hand), dealers_total(dealers_hand))
+    dealer_turn(cards, players_hand, dealers_hand, scores)
+    results = who_wins(total(players_hand), total(dealers_hand))
 
     scores[results] = increment_score(results, scores)
     winner = winner(scores)
