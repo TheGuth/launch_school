@@ -25,6 +25,22 @@ def deal_initial_cards(cards)
   cards.sample(2)
 end
 
+def players_total(players_hand)
+  players_hand_total = 0
+  players_hand.each do |card|
+    players_hand_total = card[1].to_i + players_hand_total
+  end
+  players_hand_total
+end
+
+def dealers_total(dealers_hand)
+  dealers_hand_total = 0
+  dealers_hand.each do |card|
+    dealers_hand_total = card[1].to_i + dealers_hand_total
+  end
+  dealers_hand_total
+end
+
 def total(cards)
   values = cards.map { |card| card[1] }
 
