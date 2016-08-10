@@ -25,8 +25,8 @@
 class Sieve
   attr_reader :range
 
-  def initialize(max_count)
-    @range = (2..max_count).to_a # creates and array starting with 2 upto max_count
+  def initialize(count)
+    @range = (2..count).to_a # creates and array starting with 2 upto max_count
   end
 
   def primes

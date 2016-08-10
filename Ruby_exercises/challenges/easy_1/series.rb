@@ -2,35 +2,6 @@
 # possible consecutive number series of length n in that string.
 
 class Series
-  def initialize(string_of_numbers)
-    @string_of_numbers = string_of_numbers
-    @results = []
-  end
-
-  # def slices(n)
-  #   sliced_numbers = @string_of_numbers.split('').map { |num| num.to_i }
-  #   sliced_numbers.combination(n).to_a
-  # end
-
-  def slices(n)
-    # fail ArgumentError.new("Slice is longer than input.") if n > @string_of_numbers.length
-    original_number = n
-    count = 0
-    sliced_numbers = @string_of_numbers.split('').map { |num| num.to_i }
-    raise ArgumentError.new("Slice is longer than input.") if n > sliced_numbers.size
-    loop do
-      @results << sliced_numbers.slice(count..n - 1)
-      count += 1
-      n += 1
-      break if count > sliced_numbers.size - original_number
-    end
-    @results
-  end
-end
-
-# or
-
-class Series
   attr_reader :numbers
 
   def initialize(string)
@@ -38,7 +9,7 @@ class Series
   end
 
   def slices(count)
-    raise ArgumentError.new('Slice is longer than input.') if count > numbers.length
+    raise ArgumentError.new('Slice is to long.') if count > numbers.length
     numbers.each_cons(count).to_a
   end
 end

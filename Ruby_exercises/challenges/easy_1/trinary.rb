@@ -45,26 +45,6 @@ class Trinary
   end
 end
 
-# or
-
-# class Trinary
-#   def initialize(str)
-#     @trinary = str
-#   end
-
-#   def to_decimal
-#     return 0 if invalid_trinary?
-#     numbers = @trinary.reverse.chars.map(&:to_i)
-#     numbers.each_with_index.map { |num, idx| 3**idx * num }.inject(:+)
-#   end
-
-#   private
-
-#   def invalid_trinary?
-#     @trinary.match(/[^0-2]/)
-#   end
-# end
-
 p Trinary.new('0a1b2c').to_decimal
 
 p Trinary.new('carrot').to_decimal
