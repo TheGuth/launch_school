@@ -23,11 +23,11 @@
               <a class="pure-menu-heading" href="/">Table of Contents</a>
 
               <ul class="pure-menu-list">
-                <% @contents.each_with_index do |chapter, index| %>
-                  <li class="pure-menu-item">
+                <li class="pure-menu-item">
+                  <% @contents.each_with_index do |chapter, index| %>
                     <a href="/chapters/<%= index + 1 %>" class="pure-menu-link"><%= chapter %></a>
-                  </li>
-                <% end %>
+                  <% end %>
+                </li>
               </ul>
           </div>
       </div>
@@ -44,6 +44,6 @@
       </div>
   </div>
 
-  <script type="text/javascript" src="javascripts/ui.js"></script>
+  <script type="text/javascript" src="/javascripts/ui.js"></script>
 </body>
 </html>

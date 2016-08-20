@@ -1,74 +1,79 @@
 require "sinatra"
-require "sinatra/reloader"
+require "sinatra/reloader" if development?
 require "tilt/erubis"
-require 'pry'
 
 before do
   @contents = File.readlines("data/toc.txt")
 end
 
-get "/" do
-  @title = "The Adventures of Sherlock Holmes"
-
-  erb :home
-end
-
-get "/chapters/:number" do
-  @ch_number = params[:number].to_i
-  @title = "Chapter #{@ch_number}"
-  @chapter = File.read("data/chp#{@ch_number}.txt")
-  @name = @title + " " + @contents[@ch_number - 1]
-
-  erb :chapter
-end
-
 helpers do
   def in_paragraphs(text)
-    text.split("\n\n").each_with_index.map do |line, index|
-      "<p id=paragraph#{index}>#{line}</p>"
+    paragraph_number = 0
+    text.split("\n\n").map do |line|
+      paragraph_number += 1
+      "<p id=\"#{paragraph_number}\">#{line}</p>"
     end.join
   end
-
-  def highlight(text, term)
-    text.gsub(term, %(<strong>#{term}</strong>))
-  end
-end
-
-# Calls the block for each chapter, passing that chapter's number, name, and
-# contents.
-def each_chapter(&block)
-  @contents.each_with_index do |name, index|
-    number = index + 1
-    contents = File.read("data/chp#{number}.txt")
-    yield number, name, contents
-  end
-end
-
-# This method returns an Array of Hashes representing chapters that match the
-# specified query. Each Hash contain values for its :name, :number, and
-# :paragraphs keys. The value for :paragraphs will be a hash of paragraph indexes
-# and that paragraph's text.
-def chapters_matching(query)
-  results = []
-
-  return results unless query
-
-  each_chapter do |number, name, contents|
-    matches = {}
-    contents.split("\n\n").each_with_index do |paragraph, index|
-      matches[index] = paragraph if paragraph.include?(query)
+  
+  def in_paragraphs_without_p_tag(text)
+    paragraphs_hash = {}
+    paragraph_number = 0
+    text.split("\n\n").each do |line|
+      paragraph_number += 1
+      paragraphs_hash[paragraph_number] = line
     end
-    results << {number: number, name: name, paragraphs: matches} if matches.any?
+    paragraphs_hash
   end
-
-  results
-end
-
-get "/search" do
-  @results = chapters_matching(params[:query])
-  erb :search
+  
+  def highlight_result(text)
+    text.gsub(params[:query], "<strong>#{params[:query]}</strong>")
+  end
 end
 
 not_found do
   redirect "/"
+end
+
+get "/" do
+  # File.read "public/template.html"
+  @title = "The Adventures of Sherlock Holmes"
+  erb :home
+end
+
+get "/chapters/:number" do
+  @chapter = File.read("data/chp#{params[:number]}.txt")
+  
+  number = params[:number].to_i
+  chapter_name = @contents[number - 1]
+  @title = "Chapter #{number}: #{chapter_name}"
+  
+  erb :chapter
+end
+
+get "/search" do
+  @chapters_list = {
+    :chapter_number => [],
+    :chapter_title => [],
+    :paragraph_number => [],
+    :paragraph_text => []
+  }
+  if params[:query]
+    @contents.each_with_index do |chapter_title, index|
+      chapter_paragraphs = File.read("data/chp#{index + 1}.txt")
+      chapter_paragraphs = in_paragraphs_without_p_tag(chapter_paragraphs)
+      chapter_paragraphs.each_pair do |paragraph, text|
+        if text.include?(params[:query])
+          @chapters_list[:chapter_number] << index + 1
+          @chapters_list[:chapter_title] << chapter_title
+          @chapters_list[:paragraph_number] << paragraph
+          @chapters_list[:paragraph_text] << highlight_result(text)
+        end
+      end
+    end
+  end
+  erb :search
+end
+
+get "/test" do
+  request.path_info
 end
