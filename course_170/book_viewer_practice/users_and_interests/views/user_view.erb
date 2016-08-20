@@ -1,0 +1,21 @@
+<h2><%= @name %>'s page</h2>
+  <h4>Email: <%= @users[@name.to_sym][:email]%></h3>
+
+  <h4>Interests</h4>
+    <ul>
+      
+      <li>
+        <%= @users[@name.to_sym][:interests].join(', ') %>
+      </li>
+    </ul>
+
+<h2>List of other users:</h2>
+  <ul>
+    <% @users.each do |user_name, values| %>
+      <% if user_name.to_s != @name %>
+        <li>
+          <a href="/user_view/<%= user_name %>"><%= user_name %></a>
+        </li>
+      <% end %>
+    <% end %>
+  </ul>

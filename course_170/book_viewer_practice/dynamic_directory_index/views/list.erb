@@ -1,0 +1,16 @@
+<ul>
+  <% @data.each do |file| %>
+    <li>
+      <a href="<%= file %>"><%= file %></a>
+    </li>
+  <% end %>
+</ul>
+
+<ul>
+  <li>
+    <a href="/">Sort ascending</a>
+  </li>
+  <li>
+    <a href="/?sort=desc">Sort descending</a>
+  </li>
+</ul>

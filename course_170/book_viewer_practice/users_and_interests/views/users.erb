@@ -1,0 +1,8 @@
+<h2>List of current users:</h2>
+  <ul>
+    <% @users.each do |user_name, values| %>
+      <li>
+        <a href="/user_view/<%= user_name %>"><%= user_name %></a>
+      </li>
+    <% end %>
+  </ul>
