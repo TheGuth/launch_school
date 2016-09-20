@@ -9,6 +9,10 @@ configure do
 end
 
 helpers do
+  def h(content)
+    Rack::Utils.escape_html(content)
+  end
+
   # Checks if all todos are completed
   def completed_list(list_index)
     @total = finished_todos(list_index)
@@ -148,8 +152,19 @@ end
 post "/lists/:list_number/delete" do
   list_number = params[:list_number].to_i
   session[:lists].delete_at(list_number)
-  session[:success] = "The list has been deleted."
-  redirect "/lists"
+
+  if env["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest"
+    "/lists"
+  else
+    session[:success] = "The list has been deleted."
+    redirect "/lists"
+  end
+end
+
+
+def next_todo_id(todos)
+  max = todos.map { |todo| todo[:id] }.max || 0
+  max + 1
 end
 
 # Add a new todo to a list
@@ -163,7 +178,10 @@ post "/lists/:list_number/todos" do
     session[:error] = error
     erb :list, layout: :layout
   else
-    @list[:todos] << { name: params[:todo], completed: false }
+
+    id = next_todo_id(@list[:todos]) # refine this later
+    @list[:todos] << { id: id, name: params[:todo], completed: false }
+
     session[:success] = "The todo was added."
     redirect "/lists/#{list_number}"
   end
@@ -173,10 +191,16 @@ end
 post "/lists/:list_number/todos/:todo/delete" do
   list_number = params[:list_number].to_i
   @list = session[:lists][list_number]
-  @list[:todos].delete_at(params[:todo].to_i)
-  session[:success] = "The todo has been deleted."
 
-  redirect "/lists/#{list_number}"
+  todo_id = params[:todo].to_i
+  @list[:todos].reject! { |todo| todo[:id] == todo_id } # delete_at(params[:todo].to_i)
+  
+  if env["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest"
+    status 204
+  else
+    session[:success] = "The todo has been deleted."
+    redirect "/lists/#{list_number}"
+  end
 end
 
 # update the status of a todo
@@ -186,7 +210,9 @@ post "/lists/:list_number/todos/:todo" do
 
   @todo_id = params[:todo].to_i
   is_completed = params[:completed] == "true"
-  @list[:todos][@todo_id][:completed] = is_completed
+  todo = @list[:todos].find { |todo| todo[:id] == @todo_id }
+  todo[:completed] = is_completed
+  # @list[:todos][@todo_id][:completed] = is_completed
 
   session[:success] = "The todo has been updated."
   redirect "/lists/#{list_number}"

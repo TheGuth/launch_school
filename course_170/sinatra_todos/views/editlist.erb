@@ -1,9 +1,9 @@
 <section id="todos">
   <header>
-    <h2>Editing: <%= @list[:name] %></h2>
+    <h2>Editing: <%=h @list[:name] %></h2>
     <ul>
       <li>
-        <form action="/lists/<%= params[:list_number] %>/delete" method="post">
+        <form class="delete" action="/lists/<%= params[:list_number] %>/delete" method="post">
           <button type="submit" class="delete">Delete List</button>
         </form>
       </li>
