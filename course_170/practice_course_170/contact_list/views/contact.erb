@@ -1,0 +1,8 @@
+<h2><%= @list[:name] %></h2>
+<ul>
+  <% @list.each do |item| %>
+    <li>
+      <%= item[0] %> : <%= item[1] %>
+    </li>
+  <% end %>
+</ul>

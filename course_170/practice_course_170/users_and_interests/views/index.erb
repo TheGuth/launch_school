@@ -1,0 +1,7 @@
+<h1>Users and Interests</h1>
+
+<% @users.each do |user| %>
+  <div>
+    <a href="/<%= user[0] %>"><%= user[0] %></a>
+  </div>
+<% end %>

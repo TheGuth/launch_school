@@ -1,0 +1,9 @@
+<ul>
+  <% @list.each_with_index do |contact, index| %>
+    <li><a href="/contacts/<%= index %>"><%= contact[:name] %></a></li>
+    <a href="">Delete Contact</a>
+    <a href="">Edit Contact</a>
+  <% end %>
+</ul>
+
+<a href="/contacts/new">Add Contact</a>

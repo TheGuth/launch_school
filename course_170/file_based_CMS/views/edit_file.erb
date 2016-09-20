@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <title>File Based CMS</title>
+    <meta charset="UTF-8">
+  </head>
+  <body>
+    <header>
+    </header>
+    <main>
+
+      <form method="post" action="/<%= @filename %>">
+        <label for="<%= params[:filename] %>"><h1>Edit Contents of <%= params[:filename] %></h1></label>
+      <div>
+        <textarea name="content" placeholder="Documents can be edited now!" id="content" rows="30" cols="100"></textarea>
+      </div>
+      <button type="submit">Save Changes"</button>
+      <a href="/">Cancel</a>
+    </form>
+
+    </main>
+  </body>
+</html>

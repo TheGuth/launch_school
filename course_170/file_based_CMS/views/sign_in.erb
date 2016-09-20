@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <title>Sign In</title>
+
+    <meta charset="UTF-8">
+  </head>
+  <body>
+    <header>
+    </header>
+
+    <form method="post" action="/users/signin">
+      <div>
+        <label> Username:
+          <input name="username" value="<%= params[:username] %>"/>
+        </label>
+      </div>
+      <div>
+        <label for="password"> Password:
+          <input type="password" name="password"/>
+        </label>
+      </div>
+        <button type="submit">Sign In</button>
+    </form>
+
+    <main>
+    </main>
+  </body>
+</html>

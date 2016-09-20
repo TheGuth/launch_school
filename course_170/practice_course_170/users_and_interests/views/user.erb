@@ -1,0 +1,24 @@
+<h1>Users and Interests</h1>
+
+<h4>email:</h4> <p><%= @users[@user][:email] %></p>
+  
+<div>
+    <h4>Interests:</h4>
+    <ul>
+      <% @users[@user][:interests].each do |interest| %>
+        <li><%= interest %></li>
+      <% end %>
+    </ul>
+  </div>  
+
+<h4>Other Users</h5>
+
+<% @users.each do |user| %>
+  <% if @user != user[0] %>
+    <div>
+      <a href="/<%= user[0] %>"><%= user[0] %></a>
+    </div>
+  <% end %>
+<% end %>
+
+<h4><a href="/">Home</a></h4>
